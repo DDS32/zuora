@@ -11,7 +11,7 @@ FactoryGirl.define do
     smoothing_model "Rollover"
     uom "Each"
     trigger_event "ServiceActivation"
-    after_build do |prpc|
+    after(:build) do |prpc|
       prpc.product_rate_plan_charge_tiers << FactoryGirl.build(:product_rate_plan_charge_tier)
     end
   end

@@ -4,9 +4,9 @@ module Zuora::Objects
     belongs_to :ancestor_account, :class_name => 'Account'
     belongs_to :creator_account, :class_name => 'Account'
     belongs_to :creator_invoice_owner, :class_name => 'Account'
-    #has_many :rate_plans
+    has_many :rate_plans
 
-    
+    #TODO: Figure out why these were commented out
     #validates_presence_of :contract_effective_date, :term_start_date
 
     #validates_inclusion_of    :auto_renew, :in => [true, false], allow_nil: true

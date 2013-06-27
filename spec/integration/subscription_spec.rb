@@ -28,14 +28,16 @@ describe "Subscription" do
     )
 
     request.should be_valid
-    request.create.should == true
-   
+
+    result = request.create
+    result[:success].should be_true
+
     subscriptions = @account.subscriptions
     subscriptions.size.should == 1
 
     subscription = subscriptions.first
     subscription.should be_valid
-    
+
     rps = subscription.rate_plans
     rps.size.should == 1
     rp = rps.first

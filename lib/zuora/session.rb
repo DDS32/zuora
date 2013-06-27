@@ -10,7 +10,7 @@ module Zuora
     # Generate a Zuora::Session object from the results hash of the login procedure. Additionally,
     # the session will only be valid for 10 minutes before it expires. A newly authenticated session
     # object will be required to make further requests after this timeout.
-    # @param [Hash]
+    # @param result_hash [Hash]
     # @return [Session]
     def self.generate(result_hash)
       result = result_hash[:login_response][:result]

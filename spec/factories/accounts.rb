@@ -5,7 +5,7 @@ FactoryGirl.define do
   end
 
   factory :active_account, :parent => :account do
-    after_create do |account|
+    after(:create) do |account|
       contact = FactoryGirl.create(:contact, :account => account)
       account.bill_to = contact
       account.sold_to = contact

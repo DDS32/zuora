@@ -25,6 +25,7 @@ module Zuora::Objects
     validates_numericality_of :payment_amount, :allow_nil => true
     validates_datetime_of     :posted_date, :allow_nil => true
     validates_numericality_of :refund_amount, :allow_nil => true
+    validates_inclusion_of    :regenerate_invoice_pdf, :in => [true, false], :allow_nil => true
     validates_inclusion_of    :status, :in => %w(Canceled Draft Error Posted), :allow_nil => true
     validates_datetime_of     :target_date
     validates_inclusion_of    :transferred_to_accounting, :in => %w(Processing Yes Error Ignore), :allow_nil => true
@@ -46,6 +47,9 @@ module Zuora::Objects
         :updated_by,
         :updated_by_id,
         :updated_date
+      )
+      write_only (
+                  :regenerate_invoice_pdf
       )
       defaults(
         #:includes_one_time => true,

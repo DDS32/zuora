@@ -7,7 +7,7 @@ module Zuora
   # you can use any of the Zuora::Object models.
   # @example
   #   Zuora.configure(:username => 'USERNAME', :password => 'PASSWORD')
-  # @param [Hash] configuration option hash
+  # @param opts [Hash] configuration option hash
   # @return [Config]
   def self.configure(opts={})
     Api.instance.config = Config.new(opts)
@@ -60,8 +60,8 @@ module Zuora
     # Generate an API request with the given block.  The block yields an xml
     # builder instance which can be used to build out the request as needed.
     # You can also provide the xml_body which will be used instead of the block.
-    # @param [Symbol] symbol of the WSDL operation to call
-    # @param [String] string xml body pass to the operation
+    # @param method [Symbol] symbol of the WSDL operation to call
+    # @param xml_body [String] string xml body pass to the operation
     # @yield [Builder] xml builder instance
     # @raise [Zuora::Fault]
     def request(method, xml_body=nil, &block)
