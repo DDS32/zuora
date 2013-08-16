@@ -5,8 +5,10 @@ module Zuora
     alias_method :to_s, :message
 
     def initialize(opts={})
-      opts.each do |k,v|
-        self.send("#{k}=", v)
+      if !opts.nil?
+        opts.each do |k,v|
+          self.send("#{k}=", v)
+        end
       end
     end
   end
