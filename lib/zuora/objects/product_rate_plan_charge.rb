@@ -44,6 +44,7 @@ module Zuora::Objects
     validates_numericality_of :specific_billing_period, :only_integer => true, :if => Proc.new { |prpc| prpc.billing_period == 'Specific Months' }
     validates_inclusion_of :trigger_event, :in => %w(ContractEffective ServiceActivation CustomerAcceptance SpecificDate)
     validates_inclusion_of :use_discount_specific_accounting_code, :in => [true, false], :allow_nil => true
+    validates_inclusion_of :legacy_revenue_reporting, :in => [true, false], :allow_nil => true
 
     define_attributes do
       read_only :created_by_id, :created_date, :updated_by_id, :update_date 
