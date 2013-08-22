@@ -1,8 +1,7 @@
 module Zuora::Objects
   class AmendRequest < Base
 
-    attr_accessor :amendment
-    attr_accessor :plans_and_charges
+    attr_accessor :amendments
 
     store_accessors :amend_options
     store_accessors :preview_options
@@ -11,9 +10,7 @@ module Zuora::Objects
 
     validate do |request|
       self.validation_errors = Array.new
-      self.validation_errors << request.must_be_present(:amendment)
-      self.validation_errors << request.must_be_present(:plans_and_charges) unless 
-        (amendment.type == "TermsAndConditions" || amendment.type == "Renewal" || amendment.type == "Cancellation")
+      self.validation_errors << request.must_be_present(:amendments)
     end
 
     def must_be_present(ref)
@@ -26,10 +23,7 @@ module Zuora::Objects
       return validation_errors unless valid?
       result = Zuora::Api.instance.request(:amend) do |xml|
         xml.__send__(zns, :requests) do |r|
-          r.__send__(zns, :Amendments) do |a|
-            generate_amendment a
-            generate_rate_plan_data a
-          end
+          generate_amendment r
 
           r.__send__(zns, :AmendOptions) do |so|
             generate_amend_options(so)
@@ -71,37 +65,41 @@ module Zuora::Objects
       end
     end
 
-    def generate_amendment(builder)        
-      amendment.to_hash.each do |k,v|
-        if k.to_s != 'rate_plan_data'
-          builder.__send__(ons, k.to_s.zuora_camelize.to_sym, v) unless v.nil?
-        end 
-      end      
+    def generate_amendment(builder)
+      amendments.each do |amendment|
+        builder.__send__(zns, :Amendments) do               
+          amendment.to_hash.each do |k,v|
+            if k.to_s == 'rate_plan_data'
+              generate_rate_plan_data(builder, v)
+            else
+              builder.__send__(ons, k.to_s.zuora_camelize.to_sym, v) unless v.nil?
+            end 
+          end
+        end
+      end
     end
 
-    def generate_rate_plan_data(builder)
+    def generate_rate_plan_data(builder, plans_and_charges)
+      rate_plan = plans_and_charges[:rate_plan]
+      charges = plans_and_charges[:charges]
 
-      self.plans_and_charges.each do |pandc|
+      return if !rate_plan
 
-        rate_plan = pandc[:rate_plan]
-        charges = pandc[:charges]
-
-        builder.__send__(ons, :RatePlanData) do |rpd|
-          rpd.__send__(zns, :RatePlan) do |rp|
-            rate_plan.to_hash.each do |k,v|
-              rp.__send__(ons, k.to_s.zuora_camelize.to_sym, v) unless v.nil?
+      builder.__send__(ons, :RatePlanData) do |rpd|
+        rpd.__send__(zns, :RatePlan) do |rp|
+          rate_plan.to_hash.each do |k,v|
+            rp.__send__(ons, k.to_s.zuora_camelize.to_sym, v) unless v.nil?
+          end
+        end
+        charges.each do |charge|
+          rpd.__send__(zns, :RatePlanChargeData) do |rpcd|
+            rpcd.__send__(zns, :RatePlanCharge) do |rpc|
+              rpc.__send__(ons, :ProductRatePlanChargeId, charge.product_rate_plan_charge_id)
+              rpc.__send__(ons, :Quantity, charge.quantity)
+              rpc.__send__(ons, :Price, charge.price) unless charge.price.nil?
             end
           end
-          charges.each do |charge|
-            rpd.__send__(zns, :RatePlanChargeData) do |rpcd|
-              rpcd.__send__(zns, :RatePlanCharge) do |rpc|
-                rpc.__send__(ons, :ProductRatePlanChargeId, charge.product_rate_plan_charge_id)
-                rpc.__send__(ons, :Quantity, charge.quantity)
-                rpc.__send__(ons, :Price, charge.price) unless charge.price.nil?
-              end
-            end
-          end unless charges == nil
-        end
+        end unless charges == nil
       end
     end
 

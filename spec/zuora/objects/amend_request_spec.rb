@@ -18,17 +18,16 @@ describe Zuora::Objects::AmendRequest do
       MockResponse.responds_with(:payment_method_credit_card_find_success) do
         product_rate_plans = [Zuora::Objects::ProductRatePlan.find('stub')]
 
-        @prps = Zuora::Objects::RatePlan.new
-        @prps.product_rate_plan_id = product_rate_plans[0].id
-        @product_rate_plans = [@prps]
+        @rate_plan = Zuora::Objects::RatePlan.new
+        @rate_plan.product_rate_plan_id = product_rate_plans[0].id
       end
     end
 
     it "provides properly formatted xml when using existing objects" do
       MockResponse.responds_with(:amend_request_success) do
-        subject.amendment = @amendment
+        @amendment.rate_plan_data = { rate_plan: @rate_plan, charges: nil }
+        subject.amendments = [ @amendment ]
 
-        subject.plans_and_charges = Array.new << { rate_plan: @product_rate_plans[0], charges: nil }
         amnd_resp = subject.create
         amnd_resp[:success].should == true
       end
@@ -45,8 +44,8 @@ describe Zuora::Objects::AmendRequest do
     it "handles applying amend failures messages" do
       MockResponse.responds_with(:amend_request_failure) do
         @amendment.subscription_id = '2c92c0f93a569878013a6778f0446b11'
-        subject.amendment = @amendment
-        subject.plans_and_charges = Array.new << { rate_plan: @product_rate_plans[0], charges: nil }
+        @amendment.rate_plan_data = { rate_plan: @rate_plan, charges: nil }
+        subject.amendments = [ @amendment ]
         amnd_resp = subject.create
         amnd_resp[:success].should == false
         amnd_resp[:errors][:message].should include('Invalid value for field SubscriptionId: 2c92c0f93a569878013a6778f0446b11')
@@ -55,8 +54,8 @@ describe Zuora::Objects::AmendRequest do
 
     it "supports amend options" do
       MockResponse.responds_with(:amend_request_success) do
-        subject.amendment = @amendment
-        subject.plans_and_charges = Array.new << { rate_plan: @product_rate_plans[0], charges: nil }
+        @amendment.rate_plan_data = { rate_plan: @rate_plan, charges: nil }
+        subject.amendments = [ @amendment ]
         subject.amend_options = {:generate_invoice => true, :process_payments => true}
         amnd_resp = subject.create
         amnd_resp[:success].should == true
@@ -69,8 +68,8 @@ describe Zuora::Objects::AmendRequest do
 
     it "supports preview options" do
       MockResponse.responds_with(:amend_request_success) do
-        subject.amendment = @amendment
-        subject.plans_and_charges = Array.new << { rate_plan: @product_rate_plans[0], charges: nil }
+        @amendment.rate_plan_data = { rate_plan: @rate_plan, charges: nil }
+        subject.amendments = [ @amendment ]
         subject.preview_options = { enable_preview_mode: true, number_of_periods: 1 }
         amnd_resp = subject.create
         amnd_resp[:success].should == true
@@ -81,21 +80,16 @@ describe Zuora::Objects::AmendRequest do
         with_value(true)
     end
 
-    it "supports multiple rate plans with multiple charges" do
+    it "supports a rate plan with multiple charges" do
       MockResponse.responds_with(:amend_request_success) do
 
         rpc = Zuora::Objects::RatePlanCharge.new
         rpc.quantity = 12
         rpc.product_rate_plan_charge_id = '123'
 
-        rp = Zuora::Objects::ProductRatePlan.new
-        rp.id = @product_rate_plans[0].id
+        @amendment.rate_plan_data = { rate_plan: @rate_plan, charges: [rpc, rpc] }
+        subject.amendments = [ @amendment ]
 
-        pandc = Array.new
-        pandc << {rate_plan: rp, charges: [rpc]}
-        pandc << {rate_plan: rp, charges: [rpc]}
-        subject.amendment = @amendment
-        subject.plans_and_charges = pandc
         subject.should be_valid
         sub_resp = subject.create
         sub_resp[:success].should == true
