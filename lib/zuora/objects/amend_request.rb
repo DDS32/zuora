@@ -70,7 +70,7 @@ module Zuora::Objects
         builder.__send__(zns, :Amendments) do               
           amendment.to_hash.each do |k,v|
             if k.to_s == 'rate_plan_data'
-              generate_rate_plan_data(builder, v)
+              generate_rate_plan_data(builder, v) unless v.nil?
             else
               builder.__send__(ons, k.to_s.zuora_camelize.to_sym, v) unless v.nil?
             end 
