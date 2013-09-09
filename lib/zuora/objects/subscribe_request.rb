@@ -90,9 +90,7 @@ module Zuora::Objects
                 charges.each do |charge|
                   rpd.__send__(zns, :RatePlanChargeData) do |rpcd|
                     rpcd.__send__(zns, :RatePlanCharge) do |rpc|
-                      rpc.__send__(ons, :ProductRatePlanChargeId, charge.product_rate_plan_charge_id)
-                      rpc.__send__(ons, :Quantity, charge.quantity)
-                      rpc.__send__(ons, :Price, charge.price) unless charge.price.nil?
+                      generate_rate_plan_charge(charge, rpc)
                     end
                   end
                 end unless charges.nil?
@@ -191,6 +189,12 @@ module Zuora::Objects
         builder.__send__(zns, k.to_s.zuora_camelize.to_sym, v)
       end
     end
+    
+    def generate_rate_plan_charge(charge, builder)
+      charge.to_hash.each do |k,v|
+        builder.__send__(ons, k.to_s.zuora_camelize.to_sym, v) unless v.nil?
+      end
+    end      
 
 
     # TODO: Restructute an intermediate class that includes
