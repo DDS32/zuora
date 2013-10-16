@@ -22,6 +22,7 @@ module Zuora
     if Api.instance.config.sandbox
       Api.instance.sandbox!
     end
+    Api.instance.config.login_on_every_request = false
   end
 
   class Api
@@ -66,7 +67,7 @@ module Zuora
     # @yield [Builder] xml builder instance
     # @raise [Zuora::Fault]
     def request(method, xml_body=nil, &block)
-      authenticate! unless authenticated?
+      authenticate! if !authenticated? || Zuora::Api.instance.config.login_on_every_request == true
 
       response = client.request(method) do
         soap.header = {'env:SessionHeader' => {'ins0:Session' => self.session.try(:key) }}
