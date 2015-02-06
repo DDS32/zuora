@@ -144,6 +144,7 @@ module Zuora::Objects
 
     # destroy the remote object
     def destroy
+      @destroyed = true
       result = self.connector.destroy
       apply_response(result.to_hash, :delete_response)
     end
@@ -162,6 +163,22 @@ module Zuora::Objects
 
     def connector
       self.class.connector_class.new(self)
+    end
+
+    def [](attr_name)
+      self.send(attr_name)
+    end
+
+    def self.base_class
+      if superclass == Base
+        self
+      else
+        superclass.base_class
+      end
+    end
+    
+    def destroyed?
+      @destroyed
     end
 
     protected
