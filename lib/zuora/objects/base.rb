@@ -165,6 +165,8 @@ module Zuora::Objects
       self.class.connector_class.new(self)
     end
 
+    # The following 3 methods are stubbed out versions of methods implemented by ActiveRecord which allow
+    # these objects to be stored in polymorphic associations.
     def [](attr_name)
       self.send(attr_name)
     end
