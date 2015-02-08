@@ -102,6 +102,10 @@ module Zuora::Objects
       result = self.connector.query(query_string)
       generate(result.to_hash, :query_response)
     end
+    
+    def self.primary_key
+      "id"
+    end
 
     # has this record not been saved?
     def new_record?
@@ -140,6 +144,7 @@ module Zuora::Objects
 
     # destroy the remote object
     def destroy
+      @destroyed = true
       result = self.connector.destroy
       apply_response(result.to_hash, :delete_response)
     end
@@ -158,6 +163,24 @@ module Zuora::Objects
 
     def connector
       self.class.connector_class.new(self)
+    end
+
+    # The following 3 methods are stubbed out versions of methods implemented by ActiveRecord which allow
+    # these objects to be stored in polymorphic associations.
+    def [](attr_name)
+      self.send(attr_name)
+    end
+
+    def self.base_class
+      if superclass == Base
+        self
+      else
+        superclass.base_class
+      end
+    end
+    
+    def destroyed?
+      @destroyed
     end
 
     protected

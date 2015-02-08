@@ -2,6 +2,8 @@ module Zuora::Objects
   class Payment < Base
     belongs_to :account
     belongs_to :invoice
+    belongs_to :payment_method
+    belongs_to :payment_method_snapshot
 
     validates_presence_of :account_id, :amount, :effective_date,
     :payment_method_id, :status, :type
